@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Pendulum Code</title>
+
+    <link href="prism.css" rel="stylesheet" />
+    <!--<link href="style.css" rel="stylesheet" />-->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow&display=swap" rel="stylesheet"> 
+
+    <style>
+        html{
+            scroll-behavior: smooth;
+        }
+
+        body{
+            background-color: midnightblue;
+            color: white;
+            font-family: 'Barlow', 'Roboto', 'Source Sans Pro', 'Open Sans', 'Lato', Helvetica, Arial, sans-serif;
+        }
+
+        #header {
+            color: white;
+            padding-left: 2rem;
+            padding-bottom: 1rem;
+        }
+        
+        #header h1{
+            margin-bottom:1rem;
+        }
+
+        a{
+            color:white;
+        }
+
+        .codebox{
+            padding-left:10%;
+            padding-right:10%;
+            margin-left:auto;
+            margin-right:auto;
+            
+        }
+
+        pre[class*="language-" ],
+        code[class*="language-"] {
+            white-space: pre-wrap;
+            overflow: auto;
+            word-break: break-word;
+        }
+
+        #myBtn {
+            display: none; /* Hidden by default */
+            position: fixed; /* Fixed/sticky position */
+            bottom: 1.6rem; /* Place the button at the bottom of the page */
+            right: 2rem; /* Place the button 30px from the right */
+            z-index: 99; /* Make sure it does not overlap */
+            border: 1px dashed rgb(174, 216, 255); /* Remove borders */
+            outline: none; /* Remove outline */
+            background-color:rgba(0, 110, 255, 0.147); /* Set a background color */
+            color:rgb(174, 216, 255); /* Text color */
+            cursor: pointer; /* Add a mouse pointer on hover */
+            padding: 1rem; /* Some padding */
+            font-size: 1rem; /* Increase font size */
+            /*box-shadow: 0 2px 5px 0 rgb(0, 153, 255, 0.26),0 2px 10px 0 rgb(0, 153, 255, 0.22);  */
+        }
+        
+        #myBtn:hover {
+            background-color: rgba(0, 110, 255, 0.247); /* Add a dark-grey background on hover */
+            border: 1px solid rgb(174, 216, 255); /* Remove borders */
+            box-shadow: 0 2px 5px 0 rgb(0, 153, 255, 0.26),0 2px 10px 0 rgb(0, 153, 255, 0.22);  
+        }
+  
+    </style>
+
+
+
+</head>
+<body>
+
+    <button onclick="topFunction()" id="myBtn" title="Go to top"><i class="fa fa-chevron-up"></i></button> 
+
+    <div id="header">
+        <h1>3D PENDULUM CODE</h1>
+        <a href="https://jamesstorey.co.nz">jamesstorey.co.nz</a>
+    </div>
+
+    
+
+    <div class="codebox">
+        <pre class="line-numbers"><code class="language-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;3D Pendulum&lt;/title&gt;
+
+
+    &lt;link rel="preconnect" href="https://fonts.gstatic.com"&gt;
+    &lt;link href="https://fonts.googleapis.com/css2?family=Barlow&display=swap" rel="stylesheet"&gt;
+
+    &lt;style&gt;
+        body {
+            overflow: hidden;
+            background-color: midnightblue;
+            color: white;
+            font-family: 'Barlow', 'Roboto', 'Source Sans Pro', 'Open Sans', 'Lato', Helvetica, Arial, sans-serif;
+        }
+
+        #header {
+            position: absolute;
+            padding-left: 2rem;
+        }
+
+        #footer {
+            position: absolute;
+            bottom: 0;
+            padding-left: 2rem;
+        }
+
+        a {
+            color: white;
+        }
+    &lt;/style&gt;
+
+    &lt;script type="importmap"&gt;
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.164.0/build/three.module.js"
+            }
+        }
+    &lt;/script&gt;
+
+&lt;/head&gt;
+
+&lt;body&gt;
+
+    &lt;div id="header"&gt;
+        &lt;h1&gt;3D PENDULUM&lt;/h1&gt;
+
+        &lt;p&gt;Left-click-drag to rotate view, right-click-drag to pan, mousewheel to zoom.&lt;/p&gt;
+        &lt;p&gt;&lt;a href="code.html" target="_blank"&gt;Code&lt;/a&gt;, &lt;a href="pendulum.glb"&gt;Model&lt;/a&gt;&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div id="footer"&gt;
+        &lt;p&gt;&lt;a href="https://jamesstorey.co.nz"&gt;jamesstorey.co.nz&lt;/a&gt;&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="module"&gt;
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from 'https://unpkg.com/three@0.164.0/examples/jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from 'https://unpkg.com/three@0.164.0/examples/jsm/loaders/GLTFLoader.js';
+        import { RGBELoader } from 'https://unpkg.com/three@0.164.0/examples/jsm/loaders/RGBELoader.js';
+
+        var renderer, scene, camera;
+
+        var mixer, clock;
+
+        function init() {
+
+            // renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 0.8;
+            document.body.appendChild(renderer.domElement);
+
+
+            // scene
+            scene = new THREE.Scene();
+
+            // camera
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.set(-10, 10, -20);
+            
+            scene.add(camera);
+
+            // controls
+            var controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0,4,0);
+            controls.update();
+            controls.addEventListener('change', render);
+            controls.minDistance = 3;
+            controls.maxDistance = 50;
+
+            clock = new THREE.Clock();
+
+            //hdri lighting
+            //https://discourse.threejs.org/t/how-to-add-hdri-background/53675/4
+
+            const pmremGenerator = new THREE.PMREMGenerator( renderer );
+
+            const hdriLoader = new RGBELoader()
+            //hdri image sourced from
+            //https://hdri-haven.com/hdri/decorated-photography-atelier
+            hdriLoader.load( 'christmas_photo_studio_06_1k.hdr', function ( texture ) {
+                const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+                texture.dispose();
+                pmremGenerator.dispose();
+                scene.environment = envMap
+            } );
+
+
+            // load the model
+
+            var loader = new GLTFLoader();
+
+            loader.load('pendulum.glb', function (gltf) {
+
+                scene.add(gltf.scene);
+
+                    //https://stackoverflow.com/questions/60704912/play-a-gltf-animation-three-js
+                mixer = new THREE.AnimationMixer(gltf.scene);
+
+                gltf.animations.forEach((clip) =&gt; {
+
+                    mixer.clipAction(clip).play();
+
+                });
+
+            });
+
+
+            // handle window resize events
+            window.addEventListener('resize', onWindowResize, false);
+
+        }
+
+        function onWindowResize() {
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            render();
+
+        }
+
+
+        function render() {
+
+            renderer.render(scene, camera);
+
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            var delta = clock.getDelta();
+
+            if (mixer) mixer.update(delta);
+
+            render();
+        }
+
+
+        init();
+
+        animate();
+
+
+    &lt;/script&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
+            </code>
+        </pre>
+    </div>
+    <script src="prism.js"></script>
+    <script>
+         //Get the button:
+  mybutton = document.getElementById("myBtn");
+  
+  // When the user scrolls down 20px from the top of the document, show the button
+  window.onscroll = function() {scrollFunction()};
+  
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      mybutton.style.display = "block";
+    } else {
+      mybutton.style.display = "none";
+    }
+  }
+  
+  // When the user clicks on the button, scroll to the top of the document
+  function topFunction() {
+    document.body.scrollTop = 0; // For Safari
+    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+  } 
+    </script>
+</body>
+</html>
